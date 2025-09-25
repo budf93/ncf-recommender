@@ -2,6 +2,7 @@ import torch
 import pandas as pd
 import numpy as np
 from flask import Flask, jsonify
+from flask_cors import CORS  # Import CORS
 from model import NCF
 from dataset import load_and_preprocess_data
 
@@ -25,6 +26,7 @@ model.load_state_dict(torch.load("models/ncf_recommender.pth"))
 model.eval() # Set the model to evaluation mode
 
 app = Flask(__name__)
+CORS(app) # Enable CORS for all routes
 
 @app.route('/recommend/<int:user_id>', methods=['GET'])
 def recommend(user_id):
@@ -33,7 +35,7 @@ def recommend(user_id):
         return jsonify({"error": "User not found"}), 404
 
     user_idx = user2idx[user_id]
-
+    
     # Get all movies the user has not yet rated
     all_movie_indices = np.arange(num_movies)
     rated_movies = ratings_df[ratings_df['user id'] == user_id]['item id'].values

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommender</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-lg">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Movie Recommender System</h1>
+        
+        <div class="text-center text-sm text-gray-500 mb-6">
+            <p>Enter a User ID to get movie recommendations.</p>
+            <p>Example IDs: 1 to 943</p>
+        </div>
+
+        <form id="recommendationForm" class="flex flex-col gap-4">
+            <div>
+                <label for="userId" class="block text-gray-700 font-semibold mb-2">User ID</label>
+                <input type="number" id="userId" name="userId" min="1" required 
+                       class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                       placeholder="e.g., 123">
+            </div>
+            <button type="submit" 
+                    class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300">
+                Get Recommendations
+            </button>
+        </form>
+
+        <div id="loading" class="mt-8 text-center hidden">
+            <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent text-blue-600"></div>
+            <p class="mt-2 text-gray-600">Loading recommendations...</p>
+        </div>
+
+        <div id="results" class="mt-8 hidden">
+            <div class="bg-gray-100 p-6 rounded-lg shadow-inner">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Recommended Movies</h3>
+                <ul id="recommendationList" class="list-disc list-inside space-y-2 text-gray-700"></ul>
+            </div>
+        </div>
+
+        <div id="messageBox" class="mt-6 p-4 rounded-lg text-center hidden"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('recommendationForm');
+            const loadingIndicator = document.getElementById('loading');
+            const resultsDiv = document.getElementById('results');
+            const recommendationList = document.getElementById('recommendationList');
+            const messageBox = document.getElementById('messageBox');
+            
+            // Function to display a message to the user
+            const showMessage = (text, type = 'info') => {
+                messageBox.textContent = text;
+                messageBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+                if (type === 'error') {
+                    messageBox.classList.add('bg-red-100', 'text-red-700');
+                } else if (type === 'success') {
+                    messageBox.classList.add('bg-green-100', 'text-green-700');
+                } else {
+                    messageBox.classList.add('bg-gray-100', 'text-gray-700');
+                }
+            };
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const userId = document.getElementById('userId').value;
+                
+                loadingIndicator.classList.remove('hidden');
+                resultsDiv.classList.add('hidden');
+                messageBox.classList.add('hidden');
+                recommendationList.innerHTML = '';
+
+                try {
+                    const response = await fetch(`http://127.0.0.1:5000/recommend/${userId}`);
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        if (data.recommendations && data.recommendations.length > 0) {
+                            data.recommendations.forEach(movieId => {
+                                const li = document.createElement('li');
+                                li.textContent = `Movie ID: ${movieId}`;
+                                recommendationList.appendChild(li);
+                            });
+                            resultsDiv.classList.remove('hidden');
+                        } else {
+                            showMessage('No recommendations found for this user.', 'info');
+                        }
+                    } else {
+                        showMessage(data.error || 'An error occurred.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                    showMessage('Could not connect to the API. Please ensure the backend is running.', 'error');
+                } finally {
+                    loadingIndicator.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
