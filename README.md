@@ -1,6 +1,6 @@
 # Movie Recommender System with Neural Collaborative Filtering
 
-This project is a simple movie recommender system that uses a Neural Collaborative Filtering (NCF) model to provide personalized movie recommendations. The system is built with **PyTorch** for deep learning and **Flask** for serving the recommendations through a web API. It's designed for anyone interested in a practical example of a machine learning project, from model development to deployment.
+This project is a simple movie recommender system that uses a Neural Collaborative Filtering (NCF) model to provide personalized movie recommendations. The system is built with **PyTorch** for deep learning and **Flask** for serving the recommendations through a web API. Designed for my own personal learning.
 
 -----
 
